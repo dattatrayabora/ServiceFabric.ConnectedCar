@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="ConnectedCarType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+   <Parameters>
+      <Parameter Name="DeviceActorService_PartitionCount" DefaultValue="10" />
+      <Parameter Name="DeviceActorService_MinReplicaSetSize" DefaultValue="2" />
+      <Parameter Name="DeviceActorService_TargetReplicaSetSize" DefaultValue="3" />
+      <Parameter Name="FrontEnd_InstanceCount" DefaultValue="-1" />
+      <Parameter Name="Telemetry_MinReplicaSetSize" DefaultValue="2" />
+      <Parameter Name="Telemetry_PartitionCount" DefaultValue="1" />
+      <Parameter Name="Telemetry_TargetReplicaSetSize" DefaultValue="3" />
+      <Parameter Name="ClientGateway_MinReplicaSetSize" DefaultValue="2" />
+      <Parameter Name="ClientGateway_PartitionCount" DefaultValue="2" />
+      <Parameter Name="ClientGateway_TargetReplicaSetSize" DefaultValue="3" />
+      <Parameter Name="DBConnectionString" DefaultValue="" />
+      <Parameter Name="EventHubConnectionString" DefaultValue="" />
+      <Parameter Name="EventHubName" DefaultValue="messages/events" />
+      <Parameter Name="ConsumerGroup" DefaultValue="sample" />
+   </Parameters>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="DeviceActorPkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides>
+         <ConfigOverride Name="Config">
+            <Settings>
+               <Section Name="ConfigurationSettings">
+                  <Parameter Name="DBConnectionString" Value="[DBConnectionString]" />
+               </Section>
+            </Settings>
+         </ConfigOverride>
+      </ConfigOverrides>
+   </ServiceManifestImport>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="FrontEndPkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides />
+   </ServiceManifestImport>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="TelemetryPkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides>
+         <ConfigOverride Name="Config">
+            <Settings>
+               <Section Name="ConfigurationSettings">
+                  <Parameter Name="EventHubConnectionString" Value="[EventHubConnectionString]" />
+                  <Parameter Name="EventHubName" Value="[EventHubName]" />
+                  <Parameter Name="ConsumerGroup" Value="[ConsumerGroup]" />
+               </Section>
+            </Settings>
+         </ConfigOverride>
+      </ConfigOverrides>
+   </ServiceManifestImport>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="ClientGatewayPkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides>
+         <ConfigOverride Name="Config">
+            <Settings>
+               <Section Name="ConfigurationSettings">
+                  <Parameter Name="DBConnectionString" Value="[DBConnectionString]" />
+                  <Parameter Name="EventHubConnectionString" Value="[EventHubConnectionString]" />
+               </Section>
+            </Settings>
+         </ConfigOverride>
+      </ConfigOverrides>
+   </ServiceManifestImport>
+   <DefaultServices>
+      <Service Name="DeviceActorService" GeneratedIdRef="bd934999-5dc2-4a82-aeac-dc1725e830cf">
+         <StatefulService ServiceTypeName="DeviceActorServiceType" TargetReplicaSetSize="[DeviceActorService_TargetReplicaSetSize]" MinReplicaSetSize="[DeviceActorService_MinReplicaSetSize]">
+            <UniformInt64Partition PartitionCount="[DeviceActorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+         </StatefulService>
+      </Service>
+      <Service Name="FrontEnd">
+         <StatelessService ServiceTypeName="FrontEndType" InstanceCount="[FrontEnd_InstanceCount]">
+            <SingletonPartition />
+         </StatelessService>
+      </Service>
+      <Service Name="Telemetry">
+         <StatefulService ServiceTypeName="TelemetryType" TargetReplicaSetSize="[Telemetry_TargetReplicaSetSize]" MinReplicaSetSize="[Telemetry_MinReplicaSetSize]">
+            <UniformInt64Partition PartitionCount="[Telemetry_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+         </StatefulService>
+      </Service>
+      <Service Name="ClientGateway">
+         <StatefulService ServiceTypeName="ClientGatewayType" TargetReplicaSetSize="[ClientGateway_TargetReplicaSetSize]" MinReplicaSetSize="[ClientGateway_MinReplicaSetSize]">
+            <UniformInt64Partition PartitionCount="[ClientGateway_PartitionCount]" LowKey="0" HighKey="25" />
+         </StatefulService>
+      </Service>
+   </DefaultServices>
+</ApplicationManifest>
